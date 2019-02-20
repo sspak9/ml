@@ -17,6 +17,7 @@ Draw with a white brush and erase with a black brush. When done, click Guess to 
 
 ![screen](images/screen.png)
 
+### How the model was trained
 The model was trained offline using python based tensorflow/keras framework against MNIST data.  The model selected leverages convolutional network that gave about 99.61% against the "test" data that were not used for training
 
 The actual python code used to train the model is shown below. I captured the snapshot of the model at the end of each epoch. I picked the one with the highest validation accuracy and converted that into tensorflow.js format using the command:
@@ -28,7 +29,7 @@ tensorflowjs_converter --input_format keras \
 ```
 The two files generated were copied to /public/model folder
 
-How index.html "enables" the tensorflow.js
+### How index.html "enables" the tensorflow.js
 
 I download the tensorflow.js library first in the index.html file
 ```html
