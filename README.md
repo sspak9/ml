@@ -1,11 +1,21 @@
 # Tensorflow.js based Javascript UI to predict hand-written digits
-This is a simple JavaScript UI based app that downloads the Python based Keras trained model to predict the hand-drawn digit.
+This is a simple JavaScript UI based app that downloads the Python based Keras trained model to predict the hand-drawn digit. This was converted from a "quick and dirty" learning project that leveraged flask python web server that accepted drawing from a browser and returned a guess with percentages.
+
+To run from your local dev machine, get the code, and do below to launch a web server at localhost:3000
+```bash
+npm install
+npm start
+```
+
+Use any HTML5 capable browser ( anything other than IE) to go to http://localhost:3000 to view the UI below.
+
+TODO: deploy to free heroku and show the url here:
 
 Draw with a white brush and erase with a black brush. When done, click Guess to predict the digit and show the percentage assigned for various digits the Kera ML trained model predicted.
 
-The model was trained offline using python based tensorflow/keras framework against MNIST data.  The model selected leverages convolutional network that gave about 99.61% against the "test" data that were not used for training
-
 ![screen](images/screen.png)
+
+The model was trained offline using python based tensorflow/keras framework against MNIST data.  The model selected leverages convolutional network that gave about 99.61% against the "test" data that were not used for training
 
 The actual python code used to train the model is shown below. I captured the snapshot of the model at the end of each epoch. I picked the one with the highest validation accuracy and converted that into tensorflow.js format using the command:
 
@@ -14,6 +24,7 @@ tensorflowjs_converter --input_format keras \
                        path/to/my_model.h5 \
                        path/to/tfjs_target_dir
 ```
+The two files generated were copied to /public/model folder
 
 How index.html "enables" the tensorflow.js
 
@@ -60,7 +71,6 @@ import os
 
 import tensorflow as tf
 from tensorflow import keras
-from matplotlib import pyplot as plt
 import numpy as np
 
 
