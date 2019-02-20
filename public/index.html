@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/2.6.0/fabric.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/0.15.2/tf.min.js"></script>
+</head>
+<body>
+<button id="clear" style="height:50px;width:80px" >Clear</button>
+<input type="checkbox" id="whitecolor" name="whitecolorcheck" value="white" onclick="setupwhite()">White Brush</input>
+<input type="checkBox" id="blackcolor" name="blockcolorcheck" value="black" onclick="setupblack()">Black Brush</input>
+<table>
+<tr><th>Draw Digit</th><th>28x28</th><th>Actual Image</th></tr>
+<tr>
+<td id='tdc'>
+<canvas id="c" width="112" height="112" style="border:1px solid black !important;" ></canvas>
+</td>
+<td>
+<canvas id="c3" width="112" height="112" style="border:1px solid rgb(104, 82, 82) !important;" ></canvas>
+</td>
+<td align="center"><img id="target"></td>
+</tr>
+</table>
+<button id="convert" style="height:50px;width:230px">Guess</button>
+<h3 id="guesstext"></h3>
+<canvas id="bar-chart" width="400" height="300"></canvas>
+<script>
+
+var $ = function(id){return document.getElementById(id)};
+var canvas = new fabric.Canvas(document.getElementById('c'), {
+  isDrawingMode: true
+});
+
+
+// load model
+var model;
+
+mp = tf.loadLayersModel('/model/model.json');
+mp.then( function(value) {
+  model = value;
+})
+
+function setupwhite() {
+  $('whitecolor').checked = true;
+  $('blackcolor').checked = false;
+  canvas.freeDrawingBrush.color='white';
+};
+
+function setupblack() {
+  $('whitecolor').checked = false;
+  $('blackcolor').checked = true;
+  canvas.freeDrawingBrush.color='black';
+};
+
+let canvas3 = new fabric.Canvas(document.getElementById('c3'), {
+  isDrawingMode: false
+});
+
+canvas.freeDrawingBrush.width = 10;
+canvas.freeDrawingBrush.color='white';
+let barcanvas = $('bar-chart');
+
+var mainChart = new Chart(document.getElementById("bar-chart"), {
+    type: 'bar',
+    data: {
+      labels: ["0", "1", "2", "3", "4" , "5", "6" , "7" , "8", "9"],
+      datasets: [
+        {
+          label: "prediction",
+          data: [0,0,0,0,0,0,0,0,0,0]
+        }
+      ]
+    },
+    options: {
+      responsive: false,
+      maintainAspectRatio: true,
+      legend: { display: false },
+      title: {
+        display: true,
+        text: 'Probabilities for Each Digit'
+      },
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true,
+            suggestedMin: 0
+
+          }
+        }]
+      }
+    }
+});
+
+clearMain();
+
+function clearMain() {
+  
+  $('guesstext').innerHTML ='';
+  canvas.clear();
+  canvas3.clear();
+  mainChart.data.datasets[0].data = [0,0,0,0,0,0,0,0,0,0];
+  mainChart.update()
+  
+  let rect = new fabric.Rect({
+    left: 0,
+    top: 0,
+    fill: 'black',
+    width: 112,
+    height: 112
+  });
+
+  canvas.add(rect);
+  
+  canvas.renderAll();
+  
+  setupwhite();
+
+}
+$('clear').onclick = function() { clearMain();};
+
+function togray(r,g,b) {
+  return (r* 0.2126 + g * 0.7152 + b * 0.0722);
+};
+
+$('convert').onclick = function() {
+  guessnow()
+}
+
+
+function guessnow() { 
+  console.log('convert called');
+  //canvas.renderAll();
+  //use html, not fabric version of canvas to extract data
+
+  
+  let ctx = $('c').getContext('2d');
+  let width = ctx.canvas.width;
+  let idata = ctx.getImageData(0,0,width,width);
+
+  // convert to gray
+  let ga = new Array(width*width);
+  let k = 0;
+  for( let i = 0 ; i < idata.data.length ; i+= 4) {
+    ga[k++] = togray(idata.data[i] , idata.data[i+1], idata.data[i+2]);
+   
+  }
+
+  let downfactor = width / 28;
+  console.log('downfactor:',downfactor);
+
+  // scale down by the factor 
+  let i = 0;
+  let finalArray = new Array(28*28);
+  let divnum = downfactor * downfactor;
+
+  for(let y = 0 ; y < width ; y +=downfactor) {
+    for(let x = 0 ; x < width ; x +=downfactor) {
+      let sum = 0;
+      for(let row = 0 ; row < downfactor ; row++) {
+        let gindex = y * width + width*row + x;
+        for( let col = 0 ;  col < downfactor ; col++) {
+          //console.log('ga index:', gindex + col, ga[gindex+col]);
+          sum += ga[gindex + col];
+        }
+      }
+      //console.log('sum is:', sum)
+      finalArray[i++] = Math.round( sum / divnum );
+      //console.log('final:', i-1 , finalArray[i-1]);
+    }
+  } 
+
+  
+  let ctx3 = $('c3').getContext('2d');
+  let idata3 = ctx3.getImageData(0,0,width,width);
+  for(let y = 0 ; y < width ; y++) {
+    for(let x = 0 ; x < width ; x++) {
+      let i = Math.floor(y/downfactor) * 28 + Math.floor(x/downfactor);
+      let index = y*width*4 + x*4;
+      let v = 255 - finalArray[i];
+      idata3.data[index] = v;
+      idata3.data[index+1] = v;
+      idata3.data[index+2] = v;
+      idata3.data[index+3] = 255;
+    }
+  }
+  ctx3.putImageData(idata3,0,0);
+
+  let canvas2 = document.createElement('canvas');
+  canvas2.width = 28;
+  canvas2.height = 28;
+
+  let ctx2 = canvas2.getContext('2d');
+  let idata2 = ctx2.getImageData(0,0,28,28);
+  let fa = new Array(784)
+
+  for(let y = 0 ; y < 28 ; y++) {
+    for(let x = 0 ; x < 28 ; x++) {
+      let i = y*28 + x;
+      let index = i * 4;
+      let v = finalArray[i];
+      idata2.data[index] = v;
+      idata2.data[index+1] = v;
+      idata2.data[index+2] = v;
+      idata2.data[index+3] = 255;
+
+      fa[i] = v / 255.0;
+    }
+  }
+  ctx2.putImageData(idata2,0,0);
+  var img = canvas2.toDataURL();
+  $('target').setAttribute('src', img);
+  
+  // convert to 4D tensor
+  let t4d = tf.tensor4d( fa , [1 , 28, 28, 1]);
+  
+  // predict
+  let rp = model.predict(t4d)
+
+  // rp.data() is a promise
+  rpd = rp.data().then(function(r) {
+    
+    // find guess ( don't know yet how to call tf.math.argmax yet)
+    let maxv = -1.0;
+    let maxid = -1
+    for(let i = 0 ; i< 10 ; i++ ) {
+      if( maxv < r[i]) {
+        maxv = r[i]
+        maxid = i
+      }
+    }
+    console.log('guess:', maxid)
+    console.log('percent', r)
+    $('guesstext').innerHTML ='Guess: ' + maxid;
+    mainChart.data.datasets[0].data = r
+    mainChart.update()
+  })
+
+};
+
+
+
+
+</script>
+</body>
+</html>
