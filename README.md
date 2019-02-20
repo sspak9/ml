@@ -9,7 +9,9 @@ npm start
 
 Use any HTML5 capable browser ( anything other than IE) to go to http://localhost:3000 to view the UI below.
 
-TODO: deploy to free heroku and show the url here:
+I've deployed this to a Heroku URL:
+https://sspak9-ml.herokuapp.com/
+
 
 Draw with a white brush and erase with a black brush. When done, click Guess to predict the digit and show the percentage assigned for various digits the Kera ML trained model predicted.
 
