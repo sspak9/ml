@@ -58,3 +58,5 @@ node_modules/
 
 # DynamoDB Local files
 .dynamodb/
+
+/public/model.save/
