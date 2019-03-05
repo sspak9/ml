@@ -69,6 +69,8 @@ The rest of the code is used to extract the data from the Promise and display on
 
 [View Jupyter Notebook on sample cnn model](mac_plaid.ipynb)
 
+[View Jupyter Notebook on using data augmentation to enhance the cnn model](CNN_augmentation.ipynb)
+
 Sample python code to train on MNIST data using tensorflow/kera
 ```python
 import time
