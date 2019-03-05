@@ -63,8 +63,13 @@ Then the gray image that is of 28x28 size (784) is converted to float array of v
 ```
 The rest of the code is used to extract the data from the Promise and display on the UI.
 
-python code to train on MNIST data using tensorflow/kera
 
+
+[View Jupyter Notebook on simple ANN model](Keras_ANN.ipynb)
+
+[View Jupyter Notebook on sample cnn model](mac_plaid.ipynb)
+
+Sample python code to train on MNIST data using tensorflow/kera
 ```python
 import time
 import os
