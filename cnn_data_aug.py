@@ -79,7 +79,7 @@ model.summary()
 #train the model with train data
 fit_history = model.fit( x_train2, 
 				  y_train2, 
-				  epochs=50 , 
+				  epochs=100 , 
 				  batch_size=200, 
 				  validation_data=(x_test2,y_test2))
 
@@ -95,7 +95,7 @@ datagen = keras.preprocessing.image.ImageDataGenerator(
 # allow datagen to get some metrics over the train data
 datagen.fit(x_train2)
 
-checkpt_path='models/va{val_acc:.4f}-ac{acc:.5f}-vl{val_loss:.5f}-ep{epoch:03d}.hdf5'
+checkpt_path='models/va{val_acc:.4f}-ac{acc:.5f}-vl{val_loss:.5f}-ep{epoch:04d}.hdf5'
 
 cp_callback=keras.callbacks.ModelCheckpoint(
   checkpt_path,
@@ -115,7 +115,7 @@ cp_callback2=keras.callbacks.ModelCheckpoint(
 
 fit_history = model.fit_generator( datagen.flow( x_train2, y_train2, batch_size=200),
     steps_per_epoch=len(x_train) / 200,
-    epochs = 999,
+    epochs = 300,
     validation_data = (x_test2, y_test2)
     ,callbacks=[cp_callback2]
 )
