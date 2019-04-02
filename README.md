@@ -74,3 +74,5 @@ The rest of the code is used to extract the data from the Promise and display on
 [View Jupyter Notebook on couple of gotchas when using keras/tensorflow](Misc_tensorlfow_keras_info.ipynb)
 
 [View how you could use 3 models to increase the prediction rate to 99.79%](read_model.ipynb)
+
+[View word embedding demo](word_embed.ipynb)
